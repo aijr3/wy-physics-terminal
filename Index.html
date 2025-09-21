@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>W-Y Physics Terminal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+    :root{
+      --terminal-bg:#0d1211;--terminal-text:#1e90ff;--terminal-border:#1e90ff;
+      --container-bg:#000a08;--border-glow:rgba(30,144,255,.5);--subtle-text:#0066cc;
+    }
+    body{font-family:'Roboto Mono',monospace;background:var(--terminal-bg);color:var(--terminal-text);
+      display:flex;justify-content:center;align-items:center;min-height:100vh;padding:1.5rem;margin:0;overflow:auto}
+    .container{width:100%;max-width:1000px;background:var(--container-bg);border:2px solid var(--terminal-border);
+      box-shadow:0 0 15px var(--border-glow);padding:2rem;border-radius:.5rem;display:flex;flex-direction:column;gap:1.5rem;animation:fadeIn 1s ease-in-out;box-sizing:border-box}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .header-section{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--subtle-text);padding-bottom:1rem;margin-bottom:1rem}
+    .logo{font-size:1.5rem;font-weight:700;line-height:1.2;color:var(--terminal-text)}
+    .version-info{text-align:right;font-size:.75rem;line-height:1.2;color:var(--subtle-text)}
+    .button-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem}
+    .command-button{background:transparent;border:1px solid var(--terminal-text);color:var(--terminal-text);padding:.75rem 1rem;
+      font-family:'Roboto Mono',monospace;font-size:.9rem;text-align:center;cursor:pointer;transition:.2s}
+    .command-button:hover{background:rgba(30,144,255,.1);box-shadow:0 0 8px var(--border-glow)}
+    .command-button:active{transform:scale(.98)}
+    .loading-animation{display:none;flex-direction:column;align-items:center;justify-content:center;height:50px}
+    .loading-animation .label{font-size:1.2rem;margin-bottom:1rem}
+    .loading-bar{width:80%;height:10px;background:transparent;border:1px solid var(--terminal-text);position:relative;overflow:hidden}
+    .loading-bar::before{content:'';position:absolute;top:0;left:0;height:100%;width:100%;
+      background:linear-gradient(90deg,transparent 0%,var(--terminal-text) 50%,transparent 100%);
+      transform:translateX(-100%);animation:move-loading-bar 3s linear infinite}
+    @keyframes move-loading-bar{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+    .output-screen{background:var(--container-bg);padding:1.5rem;border:1px solid var(--subtle-text);
+      box-shadow:inset 0 0 5px rgba(30,144,255,.2);font-size:.9rem;white-space:pre-wrap;line-height:1.5;overflow-x:auto}
+    .output-heading{font-size:1.2rem;font-weight:700;color:var(--terminal-text);text-transform:uppercase;margin-bottom:.5rem}
+    .explanation-section{margin-bottom:1.5rem}
+    .explanation-section p,.explanation-section ul{margin:.5rem 0}
+    .explanation-section ul{list-style:none;padding-left:1.5rem}
+    .explanation-section li{position:relative;padding-left:1em}
+    .explanation-section li::before{content:'>';position:absolute;left:0;color:var(--subtle-text)}
+    .variable-solver-section{border-top:2px solid var(--subtle-text);padding-top:1.5rem;margin-top:1rem}
+    .input-group{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+    .input-group label{font-size:.85rem;color:var(--subtle-text)}
+    .input-group input{background:transparent;border:1px solid var(--subtle-text);color:var(--terminal-text);padding:.5rem;
+      font-family:'Roboto Mono',monospace;font-size:.9rem;outline:none;transition:.2s}
+    .input-group input:focus{border-color:var(--terminal-text);box-shadow:0 0 5px var(--border-glow)}
+    .calculate-button{width:100%;background:var(--terminal-text);color:var(--terminal-bg);border:none;padding:.75rem 1rem;
+      font-family:'Roboto Mono',monospace;font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s}
+    .calculate-button:hover{background:#1e90ff;color:#000;transform:translateY(-1px)}
+    .result-output{text-align:center;margin-top:1rem;font-size:1.1rem;font-weight:700;color:var(--terminal-text)}
+    @media (min-width:768px){
+      .input-group{flex-direction:row;justify-content:space-between;align-items:center}
+      .input-group label{flex-basis:30%}
+      .input-group input{flex-basis:65%}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-section">
+      <div class="logo">W-Y Physics Terminal</div>
+      <div class="version-info">
+        Manufacturer: Aijr333<br/>System 4.5.1<br/>Core: Physics/Formula Explainer<br/>Status: Operational
+      </div>
+    </div>
+
+    <div class="button-grid">
+      <button class="command-button" onclick="loadContent('F = ma (Newton\\'s Second Law)')">F = ma</button>
+      <button class="command-button" onclick="loadContent('E = mc^2 (Mass-Energy Equivalence)')">E = mc²</button>
+      <button class="command-button" onclick="loadContent('Kinetic Energy (KE)')">Kinetic Energy</button>
+      <button class="command-button" onclick="loadContent('Potential Energy (PE)')">Potential Energy</button>
+      <button class="command-button" onclick="loadContent('Velocity')">Velocity</button>
+      <button class="command-button" onclick="loadContent('Density')">Density</button>
+      <button class="command-button" onclick="loadContent('Euler\\'s Identity')">Euler's Identity</button>
+      <button class="command-button" onclick="loadContent('Higgs Boson')">Higgs Boson</button>
+      <button class="command-button" onclick="loadContent('Quantum Mechanics')">Quantum Mechanics</button>
+      <button class="command-button" onclick="loadContent('How Electricity Works')">Electricity</button>
+      <button class="command-button" onclick="loadContent('Joules')">Joules</button>
+      <button class="command-button" onclick="loadContent('Electromagnetism')">Electromagnetism</button>
+      <button class="command-button" onclick="loadContent('Particles & Waves')">Particles & Waves</button>
+      <button class="command-button" onclick="loadContent('Radio Waves')">Radio Waves</button>
+      <button class="command-button" onclick="loadContent('Atoms & Electrons')">Atoms & Electrons</button>
+      <button class="command-button" onclick="loadContent('Quantum Entanglement')">Quantum Entanglement</button>
+      <button class="command-button" onclick="loadContent('Schrödinger Equation')">Schrödinger Equation</button>
+    </div>
+
+    <div id="loading" class="loading-animation">
+      <span class="label">&gt; ACCESSING DATA...</span>
+      <div class="loading-bar"></div>
+    </div>
+
+    <div id="outputScreen" class="output-screen">
+      <p>Select a formula or concept from the menu above to access data.</p>
+    </div>
+
+    <div id="variableSolverSection" class="variable-solver-section" style="display:none;">
+      <h3 class="output-heading">Variable Solver</h3>
+      <div id="variableInputs" class="input-group"></div>
+      <button class="calculate-button" onclick="solveEquation()">CALCULATE</button>
+      <div id="solverResult" class="result-output"></div>
+    </div>
+
+    <!-- NEW: Ask AI panel -->
+    <div class="variable-solver-section">
+      <h3 class="output-heading">Ask the Terminal (AI)</h3>
+      <div class="input-group">
+        <label for="aiPrompt">Question:</label>
+        <input id="aiPrompt" placeholder="Ask about any physics concept…"/>
+      </div>
+      <button class="calculate-button" onclick="askAI()">ASK</button>
+      <div id="aiAnswer" class="result-output"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+  <script>
+    let isToneStarted=false;
+    document.body.addEventListener('click',()=>{ if(!isToneStarted){ Tone.start(); isToneStarted=true; }});
+
+    // Sounds
+    const mainSynth=new Tone.Synth({oscillator:{type:'sine'},envelope:{attack:.01,decay:.2,sustain:.1,release:.5}}).toDestination();
+    const loadingSynth=new Tone.Synth({oscillator:{type:'sine'},envelope:{attack:.01,decay:.1,sustain:.1,release:.2}}).toDestination();
+    const successSynth=new Tone.Synth({oscillator:{type:'sine'},envelope:{attack:.01,decay:.5,sustain:0,release:.5}}).toDestination();
+    const errorSynth=new Tone.Synth({oscillator:{type:'sawtooth'},envelope:{attack:.01,decay:.1,sustain:0,release:.5}}).toDestination();
+    function playAccessSound(){ if(!isToneStarted) return; mainSynth.triggerAttackRelease("C3","0.2"); }
+    function playLoadingSound(){ if(!isToneStarted) return; loadingSynth.triggerAttackRelease("C2","0.1"); }
+    function playCalculationSound(){ if(!isToneStarted) return; successSynth.triggerAttackRelease("G4","0.5"); }
+    function playErrorSound(){ if(!isToneStarted) return; errorSynth.triggerAttackRelease("A1","0.5"); }
+
+    // Data
+    const formulaData={
+      'F = ma (Newton\'s Second Law)':{
+        explanation:[
+          {title:'What it Means',content:"Newton's Second Law explains how force, mass, and acceleration are related. Think of it like this: if you push a shopping cart (the mass), the harder you push (the force), the faster it speeds up (the acceleration). A bigger cart needs more force to get the same acceleration."},
+          {title:'The Formula',content:"The formula is F=ma. F is for Force (measured in Newtons). m is for mass (in kilograms). a is for acceleration (in meters per second squared)."},
+          {title:'Example',content:"If a 10 kg bowling ball accelerates at 2 m/s², the force on it is 10 kg multiplied by 2 m/s², which equals 20 Newtons."}
+        ],
+        variables:{'Mass':'kg','Acceleration':'m/s²'},
+        solve:(vars)=>`A force of ${(vars.mass*vars.acceleration).toFixed(2)} Newtons is needed.`,
+      },
+      'E = mc^2 (Mass-Energy Equivalence)':{
+        explanation:[
+          {title:'What it Means',content:"This is Einstein's famous formula. It tells us that mass and energy are the same thing, just in different forms. A tiny bit of mass can be converted into a huge amount of energy. This is why nuclear power works—atoms are split to release a massive amount of energy from a small amount of matter."},
+          {title:'The Formula',content:"The formula is E=mc². E is for Energy. m is for mass. c is for the speed of light. The 'c squared' part is key. Since the speed of light is so incredibly fast, squaring it makes the result a huge number. This explains why so much energy can come from so little mass."},
+          {title:'Example',content:"If you could turn just 1 kg of matter into pure energy, the result would be enough to power a large city for a very long time."}
+        ],
+        variables:{'Mass':'kg'},
+        solve:(vars)=>{ const c=299792458; return `This creates a massive amount of energy: ${(vars.mass*c*c).toExponential(2)} Joules!`; },
+      },
+      'Kinetic Energy (KE)':{
+        explanation:[
+          {title:'What it Means',content:"Kinetic energy is the energy an object has because it's moving. A running person, a thrown ball, or a moving car all have kinetic energy. The faster an object moves or the heavier it is, the more kinetic energy it has."},
+          {title:'The Formula',content:"The formula is KE = 1/2mv². KE is for Kinetic Energy. m is for mass. v is for velocity (how fast it's going). The 'v squared' part means that velocity has a much bigger impact on the energy than mass does. If you double an object's speed, its kinetic energy increases four times!"},
+          {title:'Example',content:"A 7 kg bowling ball rolling at 4 m/s has a kinetic energy of KE = 0.5 x 7 x (4 x 4), which is 56 Joules. A Joule is the unit for energy."}
+        ],
+        variables:{'Mass':'kg','Velocity':'m/s'},
+        solve:(vars)=>`The kinetic energy is ${(0.5*vars.mass*Math.pow(vars.velocity,2)).toFixed(2)} Joules.`,
+      },
+      'Potential Energy (PE)':{
+        explanation:[
+          {title:'What it Means',content:"Potential energy is stored energy, usually based on an object's position. A book on a high shelf has potential energy because if it falls, it can create a lot of energy. A stretched rubber band also has potential energy because it's ready to snap back."},
+          {title:'The Formula',content:"The formula for gravitational potential energy is PE = mgh. PE is for Potential Energy. m is for mass. g is for gravity (9.8 on Earth). h is for height. The higher the object, the more potential energy it has."},
+          {title:'Example',content:"A 2 kg book on a shelf 1 meter high has a potential energy of 2 kg x 9.8 x 1 m, which is 19.6 Joules."}
+        ],
+        variables:{'Mass':'kg','Height':'m'},
+        solve:(vars)=>{ const g=9.8; return `The potential energy is ${(vars.mass*g*vars.height).toFixed(2)} Joules.`; },
+      },
+      'Velocity':{
+        explanation:[
+          {title:'What it Means',content:"Velocity is the speed of an object in a specific direction. It's different from just speed. For example, a car's speed might be 60 miles per hour, but its velocity is 60 miles per hour north. If the car turns a corner, its velocity changes even if its speed stays the same because its direction changed."},
+          {title:'The Formula',content:"The formula is v=d/t. v is for velocity. d is for displacement (distance in a specific direction). t is for time. You calculate it by dividing the displacement by the time."},
+          {title:'Example',content:"If you walk 10 meters east in 5 seconds, your velocity is 10 meters divided by 5 seconds, which is 2 meters per second east."}
+        ],
+        variables:{'Distance':'m','Time':'s'},
+        solve:(vars)=>{ if(vars.time===0) return "Time cannot be zero!"; return `The velocity is ${(vars.distance/vars.time).toFixed(2)} meters per second.`; },
+      },
+      'Density':{
+        explanation:[
+          {title:'What It Means',content:"Density is how tightly packed matter is in an object. Imagine a rock and a cotton ball of the same size. The rock is much heavier because it is denser—it has more mass packed into the same amount of space. This is why some things float and others sink."},
+          {title:'The Formula',content:"The formula is p=m/V. p (the Greek letter rho) is for density. m is for mass. V is for volume (the space it takes up). You find the density by dividing the mass of the object by its volume."},
+          {title:'Example',content:"A block of wood with a mass of 10 kg and a volume of 0.02 m³ has a density of 500 kg per cubic meter. Since wood is less dense than water, it floats."}
+        ],
+        variables:{'Mass':'kg','Volume':'m³'},
+        solve:(vars)=>{ if(vars.volume===0) return "Volume cannot be zero!"; return `The density is ${(vars.mass/vars.volume).toFixed(2)} kilograms per cubic meter.`; },
+      },
+      "Euler's Identity":{ explanation:[
+        {title:'What It Means',content:"Euler's Identity is considered the most beautiful formula in math. It connects five of the most important numbers: e, i, pi, 1, and 0 in a single, simple equation. This is fascinating because these numbers are from very different areas of mathematics."},
+        {title:'A Cool Fact',content:"This formula is a key part of advanced math and engineering. It's often used to solve complex problems that involve waves and vibrations, from music to electrical circuits."}
+      ],variables:{},solve:()=> "There are no variables to solve for this beautiful identity. It is simply a fact of math!" },
+      'Higgs Boson':{ explanation:[
+        {title:'What It Is',content:"The Higgs boson is a tiny, fundamental particle that is part of a field that fills the entire universe. Scientists believe this particle is what gives all other fundamental particles their mass. Think of a celebrity walking through a crowded room: the more people (the Higgs field) they interact with, the more they slow down, which is like gaining mass."},
+        {title:'A Cool Fact',content:"The existence of the Higgs boson was a huge discovery that confirmed a key part of the Standard Model of particle physics—which is our best understanding of how the universe is put together on the smallest level."}
+      ],variables:{},solve:()=> "There are no variables to solve for this theoretical concept. It is a fundamental particle." },
+      'Quantum Mechanics':{ explanation:[
+        {title:'What It Is',content:"Quantum mechanics is the branch of physics that studies how matter and energy behave on the smallest scales, like at the level of atoms and electrons. At this size, the normal rules of physics don't apply. Things get weird."},
+        {title:'Key Terms',content:"Here are a few important terms: <ul><li>Quantum: A small, indivisible unit of energy or matter. For example, a single particle of light is called a photon, which is a quantum of light.</li><li>Wave-Particle Duality: The idea that tiny particles can act like both a particle and a wave at the same time.</li><li>Superposition: The bizarre idea that a particle can exist in many different states at once. It only settles into one state when we measure it.</li></ul>"}
+      ],variables:{},solve:()=> "There are no variables to solve for this branch of physics." },
+      'How Electricity Works':{ explanation:[
+        {title:'What It Is',content:"Electricity is simply the flow of tiny, charged particles called electrons. These electrons move through a path, usually a metal wire, to carry energy and power devices. The electricity you use every day to charge your phone or turn on a light is just a constant stream of these particles moving in a circuit."},
+        {title:'Key Concepts',content:"Here are some important concepts to know about electricity: <ul><li>Voltage: The 'push' or force that makes the electrons move. Think of it like water pressure in a pipe.</li><li>Current: The actual number of electrons flowing. This is like how much water is flowing through the pipe.</li><li>Resistance: Anything that slows down the flow of electrons. It's like a narrow spot in a pipe that restricts the water flow.</li></ul>"}
+      ],variables:{},solve:()=> "There are no variables to solve for this concept. It is a fundamental force." },
+      'Joules':{ explanation:[
+        {title:'What It Is',content:"A Joule is the standard unit of measurement for energy and work. Just like a meter measures distance and a kilogram measures mass, a Joule measures how much energy is being used or stored. It's used for all forms of energy, from the potential energy in a battery to the heat from a fire."},
+        {title:'A Good Way to Remember',content:"One Joule is a very small amount of energy. It's about the energy it takes to lift a small apple one meter off the ground. When you see a high number of Joules, like on a food package, it means there's a lot of energy."}
+      ],variables:{},solve:()=> "A Joule is a unit of measurement, not a variable to solve. It's the answer to other equations!" },
+      'Electromagnetism':{ explanation:[
+        {title:'What It Is',content:"Electromagnetism is one of the four fundamental forces of nature. It's the force that creates both electricity and magnetism. The two are closely linked: a changing electric field creates a magnetic field, and a changing magnetic field creates an electric field."},
+        {title:'How It Works',content:"This is the principle behind many modern devices. For example, an electric motor uses the force of electromagnetism to turn an electric current into motion. A generator does the opposite, using motion to create an electric current."}
+      ],variables:{},solve:()=> "There are no variables to solve for this concept. It is a fundamental force." },
+      'Particles & Waves':{ explanation:[
+        {title:'What They Are',content:"In physics, everything is either a particle or a wave. A **particle** is a tiny piece of matter, like a grain of sand or a single atom. It has a specific location and a specific mass. A **wave** is a disturbance that carries energy through a medium, like sound waves traveling through air or water waves. Waves don't have a specific location; they are spread out."},
+        {title:'A Strange Fact',content:"In quantum mechanics, tiny particles like electrons can sometimes act like waves. This idea, called **wave-particle duality**, is one of the strangest and most important concepts in modern physics. A single electron can behave like a spread-out wave, and a single particle of light (a photon) can behave like a wave, too."}
+      ],variables:{},solve:()=> "There are no variables to solve for these concepts. They are fundamental building blocks of the universe." },
+      'Radio Waves':{ explanation:[
+        {title:'What They Are',content:"Radio waves are a type of **electromagnetic wave**, just like light or X-rays. They are a form of energy that travels through space. They are invisible to our eyes and have the longest wavelengths of all electromagnetic waves, which is what makes them so useful for broadcasting over long distances."},
+        {title:'How They Are Used',content:"Radio waves are what allow us to listen to the radio, watch TV, and use Wi-Fi. Our phones and TVs have antennas that are designed to capture these waves and turn them back into the sound and images we can understand."}
+      ],variables:{},solve:()=> "There are no variables to solve for this concept. It is a form of energy." },
+      'Atoms & Electrons':{ explanation:[
+        {title:'What They Are',content:"An **atom** is the smallest unit of a chemical element. It's the basic building block of all matter. Atoms are made of three main parts: <ul><li>Protons: Positively charged particles.</li><li>Neutrons: Particles with no charge.</li><li>Electrons: Negatively charged particles that orbit the nucleus.</li></ul>"},
+        {title:'How They Work',content:"The **electrons** are what give an atom its chemical properties. They are constantly moving in a cloud around the nucleus. The number of electrons determines how an atom will react with other atoms to form molecules and chemical bonds."}
+      ],variables:{},solve:()=> "There are no variables to solve for these concepts. They are the building blocks of matter." },
+      'Quantum Entanglement':{ explanation:[
+        {title:'What It Is',content:"Quantum entanglement is a bizarre phenomenon where two particles become linked in such a way that they share the same fate, no matter how far apart they are. If you measure a property of one particle, you instantly know the same property of the other, even if it's on the other side of the galaxy. This connection happens faster than the speed of light!"},
+        {title:'A Bizarre Fact',content:"Albert Einstein famously called this 'spooky action at a distance' because it seemed to break the laws of physics. However, experiments have proven that it is real and is a key concept in quantum computing."}
+      ],variables:{},solve:()=> "There are no variables to solve for this theoretical concept. It is a bizarre quantum phenomenon." },
+      'Schrödinger Equation':{ explanation:[
+        {title:'What It Is',content:"The Schrödinger equation is the most important equation in quantum mechanics. It's a mathematical formula that describes how the 'quantum state' of a physical system changes over time. Think of it as the quantum version of Newton's laws of motion. It doesn't tell you the exact location of a particle, but it tells you the probability of finding it in a certain place."},
+        {title:'Why It\'s So Important',content:"The equation has been used to predict and explain the behavior of atoms, molecules, and other small particles. It is the foundation of modern chemistry and material science."}
+      ],variables:{},solve:()=> "The Schrödinger equation is a complex mathematical formula, not a simple one to solve with a calculator." }
+    };
+
+    let currentFormula;
+
+    function showMessage(message){
+      playErrorSound();
+      const messageBox=document.createElement('div');
+      messageBox.className='fixed inset-0 flex items-center justify-center p-4 z-50';
+      messageBox.innerHTML=`
+        <div style="background-color: var(--container-bg); border: 2px solid var(--terminal-border); color: var(--terminal-text); font-family: 'Roboto Mono', monospace; box-shadow: 0 0 15px var(--border-glow);" class="p-6 rounded-lg max-w-sm w-full text-center">
+          <p class="text-lg">${message}</p>
+          <button onclick="this.parentNode.parentNode.remove()" class="mt-4 px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-colors">OK</button>
+        </div>`;
+      document.body.appendChild(messageBox);
+    }
+
+    function loadContent(formulaName){
+      const formulaInfo=formulaData[formulaName];
+      currentFormula=formulaInfo;
+      playAccessSound();
+
+      const loadingElement=document.getElementById('loading');
+      const outputScreen=document.getElementById('outputScreen');
+      const variableSolverSection=document.getElementById('variableSolverSection');
+
+      outputScreen.innerHTML='';
+      variableSolverSection.style.display='none';
+      loadingElement.style.display='flex';
+
+      const loadingInterval=setInterval(()=>{ playLoadingSound(); },500);
+
+      setTimeout(()=>{
+        clearInterval(loadingInterval);
+        let contentHTML='';
+        formulaInfo.explanation.forEach(section=>{
+          contentHTML+=`
+            <div class="explanation-section">
+              <h4 class="output-heading">${section.title}</h4>
+              <p>${section.content}</p>
+            </div>`;
+        });
+        outputScreen.innerHTML=contentHTML;
+        setupVariableSolver(formulaInfo.variables);
+        loadingElement.style.display='none';
+      },3000);
+    }
+
+    function setupVariableSolver(variables){
+      const variableSolverSection=document.getElementById('variableSolverSection');
+      const variableInputsContainer=document.getElementById('variableInputs');
+      const solverResult=document.getElementById('solverResult');
+
+      variableInputsContainer.innerHTML='';
+      solverResult.textContent='';
+
+      if(Object.keys(variables).length>0){
+        for(const key in variables){
+          const unit=variables[key];
+          const id=key.toLowerCase().replace(/\s/g,'');
+          const inputGroup=document.createElement('div');
+          inputGroup.className='input-group';
+          inputGroup.innerHTML=`
+            <label for="${id}">${key} (${unit}):</label>
+            <input type="number" id="${id}" placeholder="Enter value">`;
+          variableInputsContainer.appendChild(inputGroup);
+        }
+        variableSolverSection.style.display='block';
+      }else{
+        variableSolverSection.style.display='none';
+        solverResult.textContent=currentFormula.solve({});
+      }
+    }
+
+    function solveEquation(){
+      if(!currentFormula) return;
+      const inputs={};
+      const inputElements=document.querySelectorAll('#variableInputs input');
+      let ok=true;
+      inputElements.forEach(input=>{
+        const value=parseFloat(input.value);
+        if(isNaN(value)){ ok=false; showMessage("ERROR: INVALID INPUT. NUMERICAL DATA REQUIRED."); return; }
+        inputs[input.id]=value;
+      });
+      if(!ok){ document.getElementById('solverResult').textContent=''; return; }
+      try{
+        const result=currentFormula.solve(inputs);
+        document.getElementById('solverResult').textContent=`> RESULT: ${result}`;
+        playCalculationSound();
+      }catch(e){
+        document.getElementById('solverResult').textContent="ERROR: CALCULATION FAILED.";
+        playErrorSound();
+      }
+    }
+
+    // --- NEW: AI bridge to Netlify Function ---
+    async function askAI(){
+      const q=document.getElementById('aiPrompt').value.trim();
+      if(!q) return showMessage("ERROR: ENTER A QUESTION FIRST.");
+      const ansEl=document.getElementById('aiAnswer');
+      ansEl.textContent="> ACCESSING AI…";
+      try{
+        const res=await fetch('/.netlify/functions/ask-gemini',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({question:q})
+        });
+        if(!res.ok) throw new Error(await res.text());
+        const data=await res.json();
+        ansEl.textContent=data.answer || "No answer.";
+        playCalculationSound();
+      }catch(err){
+        ansEl.textContent="ERROR: AI REQUEST FAILED.";
+        playErrorSound();
+      }
+    }
+  </script>
+</body>
+</html>
